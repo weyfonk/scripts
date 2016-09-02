@@ -31,15 +31,8 @@ y=$(($Y+$HEIGHT-10)) # rough location of text field (Y needed for same reason)
 xdotool mousemove --sync $x $y
 xdotool click 1
 
-# Read each line, set the clipboard contents with it 
+# Read the file, set the clipboard contents with it 
 # and paste from the clipboard into the window
-while read line
-do
-    len=${#line}
-    if [ $len -eq 0 ]; then
-        continue
-    fi
-    echo "$line" | xclip -selection clipboard
-    xdotool key ctrl+v Return
-done
+cat "$file" | xclip -selection clipboard # using cat instead of echo preserves indentation
+xdotool key ctrl+v Return
 echo "$clip_bkp" | xclip -selection clipboard # restore initial clipboard contents

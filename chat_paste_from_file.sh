@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Small script to paste file contents into a chat window 
-# and sent that line by line
+# Small script to paste file contents into a HexChat window 
+# and send that line by line
 # Dependencies: xclip, xdotool
 
 #set -o verbose

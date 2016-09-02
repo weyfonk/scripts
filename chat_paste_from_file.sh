@@ -18,7 +18,10 @@ if [ ! -r "$file" ]; then
     exit 1
 fi
 
+clip_bkp=$(xclip -o)
+
 exec<"$file" # use $file as input
+
 # for some reason, specifying another desktop number doesn't work
 win=$(xdotool search --sync --desktop 1 --class "HexChat")
 xdotool windowactivate $win
@@ -29,6 +32,7 @@ echo $x
 echo $y
 xdotool mousemove --sync $x $y
 xdotool click 1
+
 # Read each line, set the clipboard contents with it 
 # and paste from the clipboard into the window
 while read line
@@ -41,3 +45,4 @@ do
     echo "$line" | xclip -selection clipboard
     xdotool key ctrl+v Return
 done
+echo "$clip_bkp" | xclip -selection clipboard # restore initial clipboard contents

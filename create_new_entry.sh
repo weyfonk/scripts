@@ -24,6 +24,10 @@ dir="log/$year"
 file_name="$dir/log-$dat_filename.mdwn"
 vim_server_name=JOURNAL
 
+# Specify a project code as first argument to create a journal entry
+# dedicated to that project (morning: 4h, afternoon: 4h)
+if [ $# -eq 1 ]; then proj_code="$1 (~4h):"; else proj_code=''; fi
+
 if [ ! -d "$dir" ]
 then
     mkdir "$dir"
@@ -36,17 +40,17 @@ then
     echo "Rename it, delete it, or get ready for data loss."
 else
     echo -e $metadata > $file_name 
-    echo -e "\n\nMorning:\n\n* " >> $file_name
+    echo -e "\n\nMorning:\n\n* $proj_code" >> $file_name
     line_for_edit=$(wc -l $file_name | awk '{print $1}')
-    echo -e "\n\nAfternoon:\n\n* " >> $file_name
+    echo -e "\n\nAfternoon:\n\n* $proj_code" >> $file_name
     echo -e "\n\n→ TODO:\n\n* " >> $file_name
-    if [ $# -eq 0 ]
+    if [ $# -lt 2 ]
     then
         if [ -z $(which vim) ]
         then
             sensible-editor $file_name
         else
-            if [ -z $(vim --version | grep clientserver) ]
+            if [ -z "$(vim --version | grep clientserver)" ]
             then
                 vim +$line_for_edit $file_name
             else

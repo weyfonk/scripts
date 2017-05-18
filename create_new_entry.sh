@@ -50,7 +50,7 @@ else
         then
             sensible-editor $file_name
         else
-            if [ -z "$(vim --version | grep clientserver)" ]
+            if [ -z "$(vim --version | grep '+clientserver')" ]
             then
                 vim +$line_for_edit $file_name
             else

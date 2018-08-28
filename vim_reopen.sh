@@ -19,7 +19,7 @@ else
     dir=.
 fi
 
-bkp_files=$(ls -a $dir/.*sw[nop])
+bkp_files=$(find $dir -iname '.*sw[nop]')
 vim_files=""
 for f in $bkp_files
 do

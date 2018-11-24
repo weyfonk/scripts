@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Reads IRC logs, typically created by irssi, on the specified network
+# (hard-coded) and channel, looks for standup delimiters and reformats lines
+# located between those delimiters to match a markdown standup notes format.
+
+if [ $# != 1 ]
+then
+    echo "Usage: $0 CHANNEL"
+fi
+
+channel=$1
+network=myNetwork
+filename="standup_notes/standup-$(date +%Y%m%d).mdwn"
+irc_logfile=~/irclogs/"$network"/#"$channel".log
+if [ -e "$filename" ]
+then
+    echo "$filename already exists. Exiting..."
+    exit -1
+fi
+
+# XXX: this assumes the last standup occurrence in the log is for the relevant day
+first_line=$(grep -Ein ",\s?order is" "$irc_logfile" | tail -n 1 | cut -d':' -f1)
+last_line=$(grep -in "standup ends." "$irc_logfile" | tail -n 1 | cut -d':' -f1)
+if [ "$first_line" -ge "$last_line" ]
+then
+    echo "The most recent standup notes found start at line $first_line,"
+    echo "but end at line $last_line. There is something wrong here."
+    echo "Exiting."
+    exit 1
+fi
+
+tail_nb=$(($(wc -l "$irc_logfile" | cut -d' ' -f1) - $first_line))
+head_nb=$(( $last_line - $first_line))
+standup_text=$(tail -n $tail_nb "$irc_logfile" | head -n $head_nb)
+names=$(echo "$standup_text" | egrep '^.*## [a-zA-Z]+ [a-zA-Z]+[ ]?\([a-zA-Z]+\)$' | sed 's/^.*##/*/' | sed -e 's/[ ]\?(.*)//')
+echo "$names"
+
+echo "[[!meta title=\"Standup, $(date +%a) $(date +%d) $(date +%b) $(date +%Y)\"]]" >> "$filename"
+echo "[[!meta date=\"$(date --rfc-3339=s)\"]]" >> "$filename"
+echo "[[!meta author=\"Corentin Néau\"]]" >> "$filename"
+echo "[[!tag \"standup\"]]" >> "$filename"
+echo "" >> "$filename"
+echo "[[!toc levels=2]]" >> "$filename"
+echo "# Attendance" >> "$filename"
+echo "## Present" >> "$filename"
+echo "" >> "$filename"
+echo "$names" >> "$filename"
+echo "# Reports" >> "$filename"
+echo "$standup_text" >> "$filename"
+
+# get rid of $timestamp <$username>
+sed -Ei 's/^\[?[0-9:]*\]?\s*<.*>//' "$filename"
+
+sed -i 's/^ //' "$filename"
+sed -i 's/_o_/\\_o\\_/' "$filename"
+sed -i 's/o\//o\\\//' "$filename"
+sed -i 's/^#/\n&/' "$filename"
+sed -Ei 's/^\[[0-9]+\]:.*$/\n&/' "$filename"
+#sed -Ei 's/^(\[[0-9]+\])/\r\1/' "$filename" # new line not working yet

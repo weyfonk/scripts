@@ -20,7 +20,7 @@ dat_filename=$(date +%Y%m%d)
 year=$(date +%Y)
 
 metadata="[[!meta title=\"Journal entry $dat\"]]\n[[!meta date=\"$dat $tim\"]]"
-dir="log/$year"
+dir="$(realpath log/$year)"
 file_name="$dir/log-$dat_filename.mdwn"
 vim_server_name=JOURNAL
 
